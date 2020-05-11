@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="net.kuper.tz.job.dao.JobLogDao">
+
+    <resultMap id="jobLogMap" type="net.kuper.tz.job.entity.JobLogEntity">
+        <result property="id" column="id"/>
+        <result property="jobId" column="job_id"/>
+        <result property="beanName" column="bean_name"/>
+        <result property="methodName" column="method_name"/>
+        <result property="params" column="params"/>
+        <result property="status" column="status"/>
+        <result property="error" column="error"/>
+        <result property="times" column="times"/>
+        <result property="execUserId" column="exec_user_id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="deleteTime" column="delete_time"/>
+    </resultMap>
+
+    <sql id="columns">
+        `t`.`id` ,
+        `t`.`job_id` ,
+        `t`.`bean_name` ,
+        `t`.`method_name` ,
+        `t`.`params` ,
+        `t`.`status` ,
+        `t`.`error` ,
+        `t`.`times` ,
+        `t`.`exec_user_id` ,
+        `t`.`create_time` ,
+        `t`.`delete_time`
+    </sql>
+
+    <sql id="select_normal">
+        select
+        <include refid="columns"/>
+        from  `sys_job_log` as `t`
+    </sql>
+
+    <sql id="dft_where">
+        <if test="jobId != null and jobId.trim() != ''">
+            AND `t`.`job_id` LIKE concat('%',#{jobId} ,'%')
+        </if>
+        <if test="beanName != null and beanName.trim() != ''">
+            AND `t`.`bean_name` LIKE concat('%',#{beanName} ,'%')
+        </if>
+        <if test="methodName != null and methodName.trim() != ''">
+            AND `t`.`method_name` LIKE concat('%',#{methodName} ,'%')
+        </if>
+        <if test="params != null and params.trim() != ''">
+            AND `t`.`params` LIKE concat('%',#{params} ,'%')
+        </if>
+        <if test="status != null">
+            AND `t`.`status` = #{status}
+        </if>
+        <if test="error != null and error.trim() != ''">
+            AND `t`.`error` LIKE concat('%',#{error} ,'%')
+        </if>
+        <if test="times != null">
+            AND `t`.`times` = #{times}
+        </if>
+        <if test="execUserId != null">
+            AND `t`.`exec_user_id` = #{execUserId}
+        </if>
+        <if test="createTime != null">
+            AND date_format(`t`.`create_time`,'%Y-%m-%d') = date_format(#{createTime},'%Y-%m-%d')
+        </if>
+        <if test="deleteTime != null">
+            AND date_format(`t`.`delete_time`,'%Y-%m-%d') = date_format(#{deleteTime},'%Y-%m-%d')
+        </if>
+    </sql>
+
+    <sql id="dft_order">
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                <choose>
+                    <when test="'jobId' == sidx ">
+                        order by `t`.`job_id`
+                    </when>
+                    <when test="'beanName' == sidx ">
+                        order by `t`.`bean_name`
+                    </when>
+                    <when test="'methodName' == sidx ">
+                        order by `t`.`method_name`
+                    </when>
+                    <when test="'params' == sidx ">
+                        order by `t`.`params`
+                    </when>
+                    <when test="'status' == sidx ">
+                        order by `t`.`status`
+                    </when>
+                    <when test="'error' == sidx ">
+                        order by `t`.`error`
+                    </when>
+                    <when test="'times' == sidx ">
+                        order by `t`.`times`
+                    </when>
+                    <when test="'execUserId' == sidx ">
+                        order by `t`.`exec_user_id`
+                    </when>
+                    <when test="'createTime' == sidx ">
+                        order by `t`.`create_time`
+                    </when>
+                    <when test="'deleteTime' == sidx ">
+                        order by `t`.`delete_time`
+                    </when>
+                    <otherwise>
+                        order by `t`.`create_time`
+                    </otherwise>
+                </choose>
+            </when>
+            <otherwise>
+                order by `t`.`create_time`
+            </otherwise>
+        </choose>
+        <choose>
+            <when test="stype == 'ASC'">
+                ASC
+            </when>
+            <otherwise>
+                DESC
+            </otherwise>
+        </choose>
+    </sql>
+
+
+    <select id="queryObject" resultMap="jobLogMap">
+        <include refid="select_normal"/>
+        where `t`.`id` = #{value}
+    </select>
+
+    <select id="queryList" parameterType="map" resultMap="jobLogMap">
+        <include refid="select_normal"/>
+        WHERE 1 = 1
+        <include refid="dft_where"/>
+        <include refid="dft_order"/>
+    </select>
+
+    <insert id="save" parameterType="net.kuper.tz.job.entity.JobLogUpdateEntity" >
+        <selectKey keyProperty="id" resultType="String" order="BEFORE">
+            select REPLACE(UUID(),'-','') from dual
+        </selectKey>
+        insert into `sys_job_log`
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                `id` ,
+            </if>
+            <if test="jobId != null">
+                `job_id` ,
+            </if>
+            <if test="beanName != null">
+                `bean_name` ,
+            </if>
+            <if test="methodName != null">
+                `method_name` ,
+            </if>
+            <if test="params != null">
+                `params` ,
+            </if>
+            <if test="status != null">
+                `status` ,
+            </if>
+            <if test="error != null">
+                `error` ,
+            </if>
+            <if test="times != null">
+                `times` ,
+            </if>
+            <if test="execUserId != null">
+                `exec_user_id` ,
+            </if>
+            <if test="createTime != null">
+                `create_time` ,
+            </if>
+            <if test="deleteTime != null">
+                `delete_time` ,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id} ,
+            </if>
+            <if test="jobId != null">
+                #{jobId} ,
+            </if>
+            <if test="beanName != null">
+                #{beanName} ,
+            </if>
+            <if test="methodName != null">
+                #{methodName} ,
+            </if>
+            <if test="params != null">
+                #{params} ,
+            </if>
+            <if test="status != null">
+                #{status} ,
+            </if>
+            <if test="error != null">
+                #{error} ,
+            </if>
+            <if test="times != null">
+                #{times} ,
+            </if>
+            <if test="execUserId != null">
+                #{execUserId} ,
+            </if>
+            <if test="createTime != null">
+                #{createTime} ,
+            </if>
+            <if test="deleteTime != null">
+                #{deleteTime} ,
+            </if>
+        </trim>
+    </insert>
+
+    <update id="update" parameterType="net.kuper.tz.job.entity.JobLogUpdateEntity">
+        update `sys_job_log`
+        <set>
+            <if test="jobId != null">
+                `job_id` = #{jobId} ,
+            </if>
+            <if test="beanName != null">
+                `bean_name` = #{beanName} ,
+            </if>
+            <if test="methodName != null">
+                `method_name` = #{methodName} ,
+            </if>
+            <if test="params != null">
+                `params` = #{params} ,
+            </if>
+            <if test="status != null">
+                `status` = #{status} ,
+            </if>
+            <if test="error != null">
+                `error` = #{error} ,
+            </if>
+            <if test="times != null">
+                `times` = #{times} ,
+            </if>
+            <if test="execUserId != null">
+                `exec_user_id` = #{execUserId} ,
+            </if>
+            <if test="createTime != null">
+                `create_time` = #{createTime} ,
+            </if>
+            <if test="deleteTime != null">
+                `delete_time` = #{deleteTime} ,
+            </if>
+        </set>
+        where `id` = #{id}
+    </update>
+
+    <update id="delete">
+        update `sys_job_log` set delete_time = now() where `id` = #{value}
+    </update>
+
+    <update id="deleteBatch">
+        update `sys_job_log` set delete_time = now() where `id` in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+
+</mapper>

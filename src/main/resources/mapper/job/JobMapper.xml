@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="net.kuper.tz.job.dao.JobDao">
+
+    <resultMap id="jobMap" type="net.kuper.tz.job.entity.JobEntity">
+        <result property="id" column="id"/>
+        <result property="beanName" column="bean_name"/>
+        <result property="methodName" column="method_name"/>
+        <result property="params" column="params"/>
+        <result property="cronExpression" column="cron_expression"/>
+        <result property="status" column="status"/>
+        <result property="remark" column="remark"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="updateUserId" column="update_user_id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="createUserId" column="create_user_id"/>
+        <result property="deleteTime" column="delete_time"/>
+    </resultMap>
+
+    <sql id="columns">
+        `t`.`id` ,
+        `t`.`bean_name` ,
+        `t`.`method_name` ,
+        `t`.`params` ,
+        `t`.`cron_expression` ,
+        `t`.`status` ,
+        `t`.`remark` ,
+        `t`.`update_time` ,
+        `t`.`update_user_id` ,
+        `t`.`create_time` ,
+        `t`.`create_user_id` ,
+        `t`.`delete_time`
+    </sql>
+
+    <sql id="select_normal">
+        select
+        <include refid="columns"/>
+        from  `sys_job` as `t`
+    </sql>
+
+    <sql id="dft_where">
+        <if test="beanName != null and beanName.trim() != ''">
+            AND `t`.`bean_name` LIKE concat('%',#{beanName} ,'%')
+        </if>
+        <if test="methodName != null and methodName.trim() != ''">
+            AND `t`.`method_name` LIKE concat('%',#{methodName} ,'%')
+        </if>
+        <if test="params != null and params.trim() != ''">
+            AND `t`.`params` LIKE concat('%',#{params} ,'%')
+        </if>
+        <if test="cronExpression != null and cronExpression.trim() != ''">
+            AND `t`.`cron_expression` LIKE concat('%',#{cronExpression} ,'%')
+        </if>
+        <if test="status != null">
+            AND `t`.`status` = #{status}
+        </if>
+        <if test="remark != null and remark.trim() != ''">
+            AND `t`.`remark` LIKE concat('%',#{remark} ,'%')
+        </if>
+    </sql>
+
+    <sql id="dft_order">
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                <choose>
+                    <when test="'beanName' == sidx ">
+                        order by `t`.`bean_name`
+                    </when>
+                    <when test="'methodName' == sidx ">
+                        order by `t`.`method_name`
+                    </when>
+                    <when test="'params' == sidx ">
+                        order by `t`.`params`
+                    </when>
+                    <when test="'cronExpression' == sidx ">
+                        order by `t`.`cron_expression`
+                    </when>
+                    <when test="'status' == sidx ">
+                        order by `t`.`status`
+                    </when>
+                    <when test="'remark' == sidx ">
+                        order by `t`.`remark`
+                    </when>
+                    <when test="'updateTime' == sidx ">
+                        order by `t`.`update_time`
+                    </when>
+                    <when test="'updateUserId' == sidx ">
+                        order by `t`.`update_user_id`
+                    </when>
+                    <when test="'createTime' == sidx ">
+                        order by `t`.`create_time`
+                    </when>
+                    <when test="'createUserId' == sidx ">
+                        order by `t`.`create_user_id`
+                    </when>
+                    <when test="'deleteTime' == sidx ">
+                        order by `t`.`delete_time`
+                    </when>
+                    <otherwise>
+                        order by `t`.`create_time`
+                    </otherwise>
+                </choose>
+            </when>
+            <otherwise>
+                order by `t`.`create_time`
+            </otherwise>
+        </choose>
+        <choose>
+            <when test="stype == 'ASC'">
+                ASC
+            </when>
+            <otherwise>
+                DESC
+            </otherwise>
+        </choose>
+    </sql>
+
+
+    <select id="queryObject" resultMap="jobMap">
+        <include refid="select_normal"/>
+        where `t`.`id` = #{value}
+    </select>
+
+    <select id="queryList" parameterType="map" resultMap="jobMap">
+        <include refid="select_normal"/>
+        WHERE 1 = 1
+        <include refid="dft_where"/>
+        <include refid="dft_order"/>
+    </select>
+
+    <insert id="save" parameterType="net.kuper.tz.job.entity.JobUpdateEntity" >
+        <selectKey keyProperty="id" resultType="String" order="BEFORE">
+            select REPLACE(UUID(),'-','') from dual
+        </selectKey>
+        insert into `sys_job`
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                `id` ,
+            </if>
+            <if test="beanName != null">
+                `bean_name` ,
+            </if>
+            <if test="methodName != null">
+                `method_name` ,
+            </if>
+            <if test="params != null">
+                `params` ,
+            </if>
+            <if test="cronExpression != null">
+                `cron_expression` ,
+            </if>
+            <if test="status != null">
+                `status` ,
+            </if>
+            <if test="remark != null">
+                `remark` ,
+            </if>
+            <if test="createUserId != null">
+                `create_user_id` ,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id} ,
+            </if>
+            <if test="beanName != null">
+                #{beanName} ,
+            </if>
+            <if test="methodName != null">
+                #{methodName} ,
+            </if>
+            <if test="params != null">
+                #{params} ,
+            </if>
+            <if test="cronExpression != null">
+                #{cronExpression} ,
+            </if>
+            <if test="status != null">
+                #{status} ,
+            </if>
+            <if test="remark != null">
+                #{remark} ,
+            </if>
+            <if test="createUserId != null">
+                #{createUserId} ,
+            </if>
+        </trim>
+    </insert>
+
+    <update id="update" parameterType="net.kuper.tz.job.entity.JobUpdateEntity">
+        update `sys_job`
+        <set>
+            <if test="beanName != null">
+                `bean_name` = #{beanName} ,
+            </if>
+            <if test="methodName != null">
+                `method_name` = #{methodName} ,
+            </if>
+            <if test="params != null">
+                `params` = #{params} ,
+            </if>
+            <if test="cronExpression != null">
+                `cron_expression` = #{cronExpression} ,
+            </if>
+            <if test="status != null">
+                `status` = #{status} ,
+            </if>
+            <if test="remark != null">
+                `remark` = #{remark} ,
+            </if>
+            <if test="updateUserId != null">
+                `update_user_id` = #{updateUserId} ,
+            </if>
+            `update_time` = now() ,
+        </set>
+        where `id` = #{id}
+    </update>
+
+    <update id="delete">
+        update `sys_job` set delete_time = now(), `update_time` = now() , `update_user_id` = #{userId} where `id` = #{id}
+    </update>
+
+    <update id="deleteBatch">
+        update `sys_job` set delete_time = now(), `update_time` = now(), `update_user_id` = #{userId} where `id` in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+
+</mapper>
